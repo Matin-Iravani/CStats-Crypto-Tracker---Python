@@ -38,13 +38,14 @@ def api_runner(file_path: str, active_message: list[str]):
 
     url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'  # API endpoint
     parameters = {
-        'start': '1',           # Start at the first cryptocurrency at this rank
-        'limit': '50',          # Limit to top 50 cryptocurrencies (NOTE YOU CAN CHANGE THIS VALUE BUT BE AWARE OF PULL CREDITS)
-        'convert': 'USD'        # Convert prices to USD (NOTE YOU CAN CHANGE THE CURRENCY)
+        'start': '1',     # Start at the first cryptocurrency at this rank
+        'limit': '50',    # Limit to top 50 cryptocurrencies (NOTE YOU CAN CHANGE THIS VALUE BUT BE AWARE OF PULL CREDITS)
+        'convert': 'USD'  # Convert prices to USD (NOTE YOU CAN CHANGE THE CURRENCY)
     }
     headers = {
         'Accepts': 'application/json',
-        'X-CMC_PRO_API_KEY': '11f8b595-67e7-4e34-8939-54154d879449', # API Key (Look at README.md to see how you can get your own for free!)
+        # API Key (Look at README.md to see how you can get your own for free!)
+        'X-CMC_PRO_API_KEY': '11f8b595-67e7-4e34-8939-54154d879449',
     }
     
     session = Session() 
@@ -63,7 +64,7 @@ def api_runner(file_path: str, active_message: list[str]):
             # Save data to file
             save_timestamp()
             with open(file_path, 'w') as file:
-                json.dump(data, file, indent=4)     # Save the API data to a file with indent
+                json.dump(data, file, indent=4)  # Save the API data to a file with indent
             
             # Update the active_message to indicate success
             active_message[0] = 0

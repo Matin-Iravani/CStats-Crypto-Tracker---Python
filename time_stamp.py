@@ -34,7 +34,8 @@ from datetime import datetime
 
 def save_timestamp():
     """
-    Saves the current timestamp to the Windows registry (if on Windows) or a JSON file (if on another OS).
+    Saves the current timestamp to the Windows registry (if on Windows) or a JSON file 
+    (if on another OS).
     """
     timestamp = datetime.now().isoformat()  # Get the current timestamp
     
@@ -62,7 +63,8 @@ def save_timestamp():
 
 def read_timestamp():
     """
-    Reads the saved timestamp from the Windows registry (if on Windows) or a JSON file (if on another OS).
+    Reads the saved timestamp from the Windows registry (if on Windows) or a JSON file 
+    (if on another OS).
     Returns the timestamp if found, otherwise None.
     """
     if sys.platform == "win32":

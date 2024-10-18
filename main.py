@@ -14,16 +14,16 @@
 """
 
 
-import os                                       # imports os
-import json                                     # imports json for saving the pulled data from api
-from PIL import Image                           # imports PIL (image) to be able to open images and display them
-from formating import *                         # imports the formating functions
-from customtkinter import *                     # imports customtkinter to display data more visually
-from CTkTable import CTkTable                   # imports CTKTable to display table more visually
-from functools import partial                   # imports functools (partial) unction with partial application of the given arguments and keywords.
-from time_stamp import read_timestamp           # imports the read_timestamp function to read a last pulled time
-from api_request import pull_from_api           # imports the pull_from_api
-from datetime import datetime, timedelta        # imports datetime to save the date and time last pulled from api (due to limits of pulls)
+import os                                    # imports os
+import json                                  # imports json
+from PIL import Image                        # imports PIL (image) to be able to open images
+from formating import *                      # imports the formating functions
+from customtkinter import *                  # imports customtkinter to display data more visually
+from CTkTable import CTkTable                # imports CTKTable to display table more visually
+from functools import partial                # imports functools (partial)
+from time_stamp import read_timestamp        # imports the read_timestamp function to read a last pulled time
+from api_request import pull_from_api        # imports the pull_from_api
+from datetime import datetime, timedelta     # imports datetime to save the time last pulled from api (due to limits of pulls)
 
 
 # Global variables
@@ -33,7 +33,8 @@ global table_frame, table
 
 def update_data(file_path: str) -> None:
     """
-    Reads cryptocurrency data from a JSON file, processes it, and updates the UI table with the latest information.
+    Reads cryptocurrency data from a JSON file, processes it, and updates the UI 
+    table with the latest information.
     
     file_path (str): The file path to the JSON file containing cryptocurrency data.
     """
@@ -55,7 +56,8 @@ def update_data(file_path: str) -> None:
 
 def update_table_ui(table_data: list) -> None:
     """
-    Updates the table UI by destroying the old table and creating a new one with the updated data.
+    Updates the table UI by destroying the old table and creating a new one 
+    with the updated data.
 
     Parameters:
     table_data (list): The updated table data.
@@ -96,10 +98,14 @@ def update_table_ui(table_data: list) -> None:
 
 def print_row(row: dict, table_data: list) -> None:
     """
-    Retrieves the data of the selected row from the table and updates the displayed cryptocurrency information at the top boxes of tkinter window.
+    Retrieves the data of the selected row from the table and updates the 
+    displayed cryptocurrency information at the top boxes of tkinter window.
 
-    row (dict): A dictionary containing the selected row's information, with the key "row" representing the row number.
-    table_data (list): A list of all row data, where each row is a list of cryptocurrency information.
+    row (dict): A dictionary containing the selected row's information, with 
+    the key "row" representing the row number.
+    
+    table_data (list): A list of all row data, where each row is a list of 
+    cryptocurrency information.
     """
     # Get the row number from the 'row' dictionary, ensuring it's at least 1
     row_num = row["row"]
@@ -114,7 +120,8 @@ def print_row(row: dict, table_data: list) -> None:
 
 def update_crypto_info(row_data: list[str]) -> None:
     """
-    Updates the displayed cryptocurrency information based on the selected row data at the top boxes of the tkinter screen.
+    Updates the displayed cryptocurrency information based on the selected row 
+    data at the top boxes of the tkinter screen.
 
     row_data (list): A list containing cryptocurrency data such as rank, name, price, 
     hourly and daily changes, market cap, short name, and total supply.
@@ -160,8 +167,8 @@ def check_last_pulled_and_pull(file_path: str, active_message: list[str]) -> Non
     Checks the timestamp of the last API pull and determines whether to pull new data or not.
     
     file_path (str): The file path where the data will be saved.
-    active_message (list[str]): A list where the first element indicates the status (0 for success, 1 for error),
-    and the second element holds the status message.
+    active_message (list[str]): A list where the first element indicates the status 
+    (0 for success, 1 for error), and the second element holds the status message.
     """
 
     last_pull_time = read_timestamp()       # Retrieve the last time data was pulled
@@ -176,13 +183,14 @@ def check_last_pulled_and_pull(file_path: str, active_message: list[str]) -> Non
     # Convert the last pull time to a datetime object
     last_pull_time = datetime.fromisoformat(last_pull_time)
 
-    # Check if enough time has passed since the last pull (2 hours NOTE you can change but be careful if you are a free user of the coinMarketCap API)
+    # Check if enough time has passed since the last pull (2 hours NOTE you can change but be 
+    # careful if you are a free user of the coinMarketCap API)
     if (time_now - last_pull_time) >= timedelta(hours=2):
-        pull_from_api(file_path, active_message)        # Pull new data from the API
+        pull_from_api(file_path, active_message)     # Pull new data from the API
         
         # If pull is successful, update the data
         if active_message[0] == 0:
-            update_data(file_path)                      # Update the table or UI with the new data
+            update_data(file_path)                  # Update the table or UI with the new data
     else:
         # Not enough time has passed since the last pull
         active_message[0] = 4
