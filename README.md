@@ -13,7 +13,7 @@ to enhance the visual experience and includes features like real-time updates an
 
 ---
 
-- **Data Rate Limiting**: To avoid excessive API calls, the app only pulls data every 2 hours. If an update is attempted before this, the user is prompted to try again later. `NOTE` you can change this by chaning the value in `check_last_pulled_and_pull` function as shown below:
+- **Data Rate Limiting**: To avoid excessive API calls, the app only pulls data every 2 hours. If an update is attempted before this, the user is prompted to try again later. `NOTE` you can change this by changing the value in `check_last_pulled_and_pull` function as shown below:
 
 ```python
 if (time_now - last_pull_time) >= timedelta(hours=2):
@@ -185,12 +185,12 @@ This project is licensed under the terms of the [LICENSE](LICENSE).
 
 ## API Credits
 
-The cryptocurrency data is provided by the [CoinMarketCap API](https://coinmarketcap.com/api/pricing/). Click Free Basic Plan and you will get access to your own API key. Also for full documentation of coinmarketcap go to [CoinMarketCap API](https://coinmarketcap.com/api/documentation/v1/)
+The cryptocurrency data is provided by the [CoinMarketCap API](https://coinmarketcap.com/api/pricing/). Click Free Basic Plan and you will get access to your own API key. Also for full documentation of coinmarketcap go to [CoinMarketCap Documentation](https://coinmarketcap.com/api/documentation/v1/)
 
 ---
 
 ## Future Improvements
 
-- Add sorting and filtering capabilities to the table for easier data navigation.
+- Add sorting and filtering capabilities to the table.
 - Implement a notification system for significant price changes.
 - Integrate more detailed charts to show historical trends.
