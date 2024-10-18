@@ -1,54 +1,116 @@
-#######################################################################################
-#                                                                                     #
-#                                CStats Main File                                     #
-#                                                                                     #
-# This is the main file for the CStats application, a cryptocurrency tracking app.    #
-# It pulls cryptocurrency data from an API, processes it, and displays it in a        #
-# user-friendly GUI using the customtkinter library. Key features include:            #
-#                                                                                     #
-# - API data pull with a rate limit (max once every 2 hours)                          #
-# - A table that lists cryptocurrencies with their name, price, percent changes, and  #
-#   market capitalization.                                                            #
-# - An interactive UI that allows users to view more details about any listed coin.   #
-#                                                                                     #
-#######################################################################################
+"""
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║                                CStats Main File                                  ║
+║                                                                                  ║
+║ This is the main file for the CStats application, a cryptocurrency tracking app. ║
+║ It pulls cryptocurrency data from an API, processes it, and displays it in a     ║
+║ user-friendly GUI using the customtkinter library. Key features include:         ║
+║                                                                                  ║
+║ - API data pull with a rate limit (max once every 2 hours).                      ║
+║ - A table that lists cryptocurrencies with their name, price, percent changes,   ║
+║   and market capitalization.                                                     ║
+║ - An interactive UI that allows users to view more details about any listed coin.║
+╚══════════════════════════════════════════════════════════════════════════════════╝
+"""
 
 
-from api_request import api_runner              # imports functions from the api_runner file
 import os                                       # imports os
 import json                                     # imports json for saving the pulled data from api
-from datetime import datetime, timedelta        # imports datetime to save the date and time last pulled from api (due to limits of pulls)
+from PIL import Image                           # imports PIL (image) to be able to open images and display them
+from formating import *                         # imports the formating functions
 from customtkinter import *                     # imports customtkinter to display data more visually
 from CTkTable import CTkTable                   # imports CTKTable to display table more visually
-from PIL import Image                           # imports PIL (image) to be able to open images and display them
 from functools import partial                   # imports functools (partial) unction with partial application of the given arguments and keywords.
 from time_stamp import read_timestamp           # imports the read_timestamp function to read a last pulled time
-from formating import *
+from api_request import pull_from_api           # imports the pull_from_api
+from datetime import datetime, timedelta        # imports datetime to save the date and time last pulled from api (due to limits of pulls)
+
 
 # Global variables
 global name_and_price_metric, total_spuply_metric, _24_hour_change_metric, metrics_frame
 global table_frame, table
 
 
-def pull_from_api(file_path: str, active_message: list[str]) -> None:
+def update_data(file_path: str) -> None:
     """
-    Pulls cryptocurrency data from the API and updates the local JSON file.
-
-    This function interacts with the `api_runner` to pull the latest crypto data 
-    and save it to the specified JSON file, either creating or overwriting the file. 
-    If an error occurs during the pull, the status is reflected in `active_message`.
+    Reads cryptocurrency data from a JSON file, processes it, and updates the UI table with the latest information.
+    
+    file_path (str): The file path to the JSON file containing cryptocurrency data.
     """
-    api_runner(file_path, active_message)
+    # Initialize the table with the header row
+    table_data = [["#", "Name", "Price(USD)", "1h %", "24h %", "MKT. Cap"]]
+
+    # Check if the file exists
+    if os.path.exists(file_path):
+        with open(file_path, "r") as file:
+            info_dict = json.load(file)
+
+            # Process the data if the 'data' key is found in the JSON file
+            if "data" in info_dict.keys():
+                table_data = process_crypto_data(info_dict["data"], table_data)
+
+    # Update the UI with the new data
+    update_table_ui(table_data)
 
 
-def clear_frame(frame):
+def update_table_ui(table_data: list) -> None:
     """
-    Clears all widgets from the specified frame.
-    """
-    # Loop through all widgets within the frame and destroy them
-    for widget in frame.winfo_children():
-        widget.destroy()
+    Updates the table UI by destroying the old table and creating a new one with the updated data.
 
+    Parameters:
+    table_data (list): The updated table data.
+    """
+    global table
+
+    # Destroy the old table UI element
+    table.destroy()
+
+    # Create a new table with the updated data
+    table = CTkTable(
+        master=table_frame,
+        border_width=7,
+        command=lambda row: print_row(row, table_data),
+        border_color="#2c2c91",
+        values=table_data,
+        colors=["#484ab8", "#5a5de6"],
+        header_color="#2c2c91",
+        hover_color="#B4B4B4",
+        corner_radius=10
+    )
+
+    # Style the header row
+    table.edit_row(0, text_color="#fff", font=("Arial Bold", 15), hover_color="#2c2c91")
+
+    # Apply styles to all rows except the first (header) row
+    for row_index in range(1, len(table_data)):
+        table.edit_row(
+            row_index,
+            text_color="#fff",
+            font=("Arial Bold", 12),
+            hover_color="#d37fcc"
+        )
+
+    # Pack the table into the window
+    table.pack(expand=True)
+
+
+def print_row(row: dict, table_data: list) -> None:
+    """
+    Retrieves the data of the selected row from the table and updates the displayed cryptocurrency information at the top boxes of tkinter window.
+
+    row (dict): A dictionary containing the selected row's information, with the key "row" representing the row number.
+    table_data (list): A list of all row data, where each row is a list of cryptocurrency information.
+    """
+    # Get the row number from the 'row' dictionary, ensuring it's at least 1
+    row_num = row["row"]
+    row_num = max(1, row_num)  # Ensure row number is not less than 1
+
+    # Retrieve the data for the specified row from the table_data
+    row_data = table_data[row_num]
+
+    # Update the displayed information using the row data
+    update_crypto_info(row_data)
+    
 
 def update_crypto_info(row_data: list[str]) -> None:
     """
@@ -93,127 +155,6 @@ def update_crypto_info(row_data: list[str]) -> None:
     # Further updates (e.g., for hour_change and market_cap) can be added here if needed.
 
 
-def print_row(row: dict, table_data: list) -> None:
-    """
-    Retrieves the data of the selected row from the table and updates the displayed cryptocurrency information at the top boxes of tkinter window.
-
-    row (dict): A dictionary containing the selected row's information, with the key "row" representing the row number.
-    table_data (list): A list of all row data, where each row is a list of cryptocurrency information.
-    """
-    # Get the row number from the 'row' dictionary, ensuring it's at least 1
-    row_num = row["row"]
-    row_num = max(1, row_num)  # Ensure row number is not less than 1
-
-    # Retrieve the data for the specified row from the table_data
-    row_data = table_data[row_num]
-
-    # Update the displayed information using the row data
-    update_crypto_info(row_data)
-
-
-def update_data(file_path: str) -> None:
-    """
-    Reads cryptocurrency data from a JSON file, processes it, and updates the UI table with the latest information.
-    
-    file_path (str): The file path to the JSON file containing cryptocurrency data.
-    """
-    # Initialize the table with the header row
-    table_data = [["#", "Name", "Price(USD)", "1h %", "24h %", "MKT. Cap"]]
-
-    # Check if the file exists
-    if os.path.exists(file_path):
-        with open(file_path, "r") as file:
-            info_dict = json.load(file)
-
-            # Process the data if the 'data' key is found in the JSON file
-            if "data" in info_dict.keys():
-                table_data = process_crypto_data(info_dict["data"], table_data)
-
-    # Update the UI with the new data
-    update_table_ui(table_data)
-
-
-def process_crypto_data(data: list, table_data: list) -> list:
-    """
-    Processes cryptocurrency data and formats it for display in the table.
-
-    data (list): The list of cryptocurrency data entries.
-    table_data (list): The table data to append to.
-
-    Returns:
-    list: The updated table data with processed cryptocurrency information.
-    """
-    number = 1  # Initialize row number for ranking
-
-    for crypto in data:
-        # Extract and format relevant data
-        rank = f"{number}"
-        name = f"{crypto['name']}"
-        crypto_price = format_price(crypto["quote"]["USD"]["price"])
-        day_change = format_percent_change(crypto["quote"]["USD"]["percent_change_24h"])
-        hour_change = format_percent_change(crypto["quote"]["USD"]["percent_change_1h"])
-        crypto_market_cap = format_market_cap(crypto["quote"]["USD"]["market_cap"])
-        short_name = crypto["symbol"]
-        total_supply = format_total_supply(crypto["total_supply"], short_name)
-
-        # Create a row with the formatted data
-        temp = [
-            rank,
-            name,
-            crypto_price,
-            hour_change,
-            day_change,
-            crypto_market_cap,
-            short_name,
-            total_supply
-        ]
-        table_data.append(temp)
-        number += 1  # Increment row number
-
-    return table_data
-
-
-def update_table_ui(table_data: list) -> None:
-    """
-    Updates the table UI by destroying the old table and creating a new one with the updated data.
-
-    Parameters:
-    table_data (list): The updated table data.
-    """
-    global table
-
-    # Destroy the old table UI element
-    table.destroy()
-
-    # Create a new table with the updated data
-    table = CTkTable(
-        master=table_frame,
-        border_width=7,
-        command=lambda row: print_row(row, table_data),
-        border_color="#2c2c91",
-        values=table_data,
-        colors=["#484ab8", "#5a5de6"],
-        header_color="#2c2c91",
-        hover_color="#B4B4B4",
-        corner_radius=10
-    )
-
-    # Style the header row
-    table.edit_row(0, text_color="#fff", font=("Arial Bold", 15), hover_color="#2c2c91")
-
-    # Apply styles to all rows except the first (header) row
-    for row_index in range(1, len(table_data)):
-        table.edit_row(
-            row_index,
-            text_color="#fff",
-            font=("Arial Bold", 12),
-            hover_color="#d37fcc"
-        )
-
-    # Pack the table into the window
-    table.pack(expand=True)
-
-
 def check_last_pulled_and_pull(file_path: str, active_message: list[str]) -> None:
     """
     Checks the timestamp of the last API pull and determines whether to pull new data or not.
@@ -236,7 +177,7 @@ def check_last_pulled_and_pull(file_path: str, active_message: list[str]) -> Non
     last_pull_time = datetime.fromisoformat(last_pull_time)
 
     # Check if enough time has passed since the last pull (2 hours NOTE you can change but be careful if you are a free user of the coinMarketCap API)
-    if (time_now - last_pull_time) >= timedelta(hours=0):
+    if (time_now - last_pull_time) >= timedelta(hours=2):
         pull_from_api(file_path, active_message)        # Pull new data from the API
         
         # If pull is successful, update the data
