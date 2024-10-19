@@ -80,7 +80,7 @@ pip install customtkinter requests Pillow
 
 ### Setup
 
-1. **API Key Setup**: CStats uses an API key from [CoinMarketCap](https://pro.coinmarketcap.com/). The current key in the project belongs to Matin Iravani and you are welcome to use it. However, you can also create your own key by following these steps:
+1. **API Key Setup**: CStats uses an API key from [CoinMarketCap](https://pro.coinmarketcap.com/). You can create your own key by following these steps:
 
    - Go to [CoinMarketCap](https://pro.coinmarketcap.com/signup/).
    - Create a free account by signing up.
