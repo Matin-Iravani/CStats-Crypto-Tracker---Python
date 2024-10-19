@@ -45,7 +45,7 @@ def api_runner(file_path: str, active_message: list[str]):
     headers = {
         'Accepts': 'application/json',
         # API Key (Look at README.md to see how you can get your own for free!)
-        'X-CMC_PRO_API_KEY': '11f8b595-67e7-4e34-8939-54154d879449',
+        'X-CMC_PRO_API_KEY': 'your-api-key',
     }
     
     session = Session() 
